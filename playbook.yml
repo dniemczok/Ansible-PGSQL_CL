@@ -1,6 +1,12 @@
 -
   name:                Instalacja PostgreSQL CL
   hosts:               all
+  vars:
+    tmask_dir: /opt/TMask
+    tmask_system: /opt/TMask/PGSQL_CL
+    ansible_postgres_user_id: postgres
+    ansible_postgres_group_id: postgres
+    tmask_sys_ver: /opt/TMask/PGSQL_CL/01
   remote_user:         root
   become:              yes
   tasks:
@@ -18,7 +24,7 @@
        repo: 'deb http://apt.postgresql.org/pub/repos/apt/ eoan-pgdg main'
        state: present
 
-   - name:            Installacja wymaganych komponentow
+   - name:            Installacja wymaganych komponentow do Postgresql 12
      apt:
        update_cache:  yes
        name:          "{{ item }}"
@@ -34,3 +40,22 @@
      - curl
      - postgresql-12
      - postgresql-client-12
+
+   - name: Tmask Folder
+     file:
+       path: /opt/TMask/
+       state: directory
+
+   - name: Tmask sys Folder
+     file:
+       path: "{{ tmask_system }}"
+       state: directory
+       owner: "{{ ansible_postgres_user_id }}"
+       group: "{{ ansible_postgres_group_id }}"
+
+   - name: Tmask ver Folder
+     file:
+       path: "{{ tmask_sys_ver}}"
+       state: directory
+       owner: "{{ ansible_postgres_user_id }}"
+       group: "{{ ansible_postgres_group_id }}"
