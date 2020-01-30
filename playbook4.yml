@@ -1,8 +1,8 @@
 -
-  name:                        Instalacja PostgreSQL CL
+  name:                        Instalacja PostgreSQL CL 04
   hosts:                       all
   vars:
-    ver:                       05
+    ver:                       4
     tmask_dir:                 /opt/TMask
     tmask_system:              /opt/TMask/PGSQL_CL
     ansible_postgres_user_id:  postgres
@@ -76,13 +76,13 @@
 
    - name:                     Copy postgersql.conf
      copy:
-       src:                    ./Files/postgresql01.conf
+       src:                    "./Files/postgresql{{ver}}.conf"
        dest:                   "{{ tmask_system }}/{{ver}}/postgresql.conf"
        mode:                   0644
 
    - name:                     Copy pg_hba.conf
      copy:
-       src:                    ./Files/pg_hba01.conf
+       src:                    "./Files/pg_hba.conf"
        dest:                   "{{ tmask_system }}/{{ver}}/pg_hba.conf"
        mode:                   0644
 

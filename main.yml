@@ -1,7 +1,12 @@
-- hosts:       all
-  tasks:
-    - debug:
-        msg:   Play
+---
 
-    - name:    Play 01
-      include: playbook01.yml
+  - name:    InitDB 01 instance
+    include: playbook1.yml
+  - name:    InitDB 02 instance
+    include: playbook2.yml
+  - name:    InitDB 03 instance
+    include: playbook3.yml
+  - name:    InitDB 04 instance
+    include: playbook4.yml
+  - name:    InitDB 05 instance
+    include: playbook5.yml
