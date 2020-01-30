@@ -1,0 +1,93 @@
+-
+  name:                        Instalacja PostgreSQL CL
+  hosts:                       all
+  vars:
+    ver:                       05
+    tmask_dir:                 /opt/TMask
+    tmask_system:              /opt/TMask/PGSQL_CL
+    ansible_postgres_user_id:  postgres
+    ansible_postgres_group_id: postgres
+    initdb:                    /usr/lib/postgresql/12/bin/initdb
+    pg_ctl:                    /usr/lib/postgresql/12/bin/pg_ctl
+    ansadmin_home_files:       /home/ansadmin/Ansible-PGSQL_CL/Files
+  remote_user:                 root
+  become:                      yes
+  tasks:
+
+ ## Instalacja PostgreSQL CL 12
+
+   - name:                     Add an Apt signing key, uses whichever key is at the URL
+     apt_key:
+       url:                    https://www.postgresql.org/media/keys/ACCC4CF8.asc
+       state:                  present
+     ignore_errors:            yes
+
+   - name:                     Add Postgresql 12 apt repository
+     apt_repository:
+       repo:                   'deb http://apt.postgresql.org/pub/repos/apt/ eoan-pgdg main'
+       state:                  present
+
+   - name:                     Installacja wymaganych komponentow do Postgresql 12
+     apt:
+       update_cache:           yes
+       name:                   "{{ item }}"
+       state:                  present
+     with_items:
+     - htop
+     - mc
+     - screen
+     - nmon
+     - iftop
+     - tcpdump
+     - unzip
+     - curl
+     - postgresql-12
+     - postgresql-client-12
+     - python-psycopg2
+
+   - name:                     Tmask Folder
+     file:
+       path:                   /opt/TMask/
+       state:                  directory
+
+   - name:                     Tmask sys Folder
+     file:
+       path:                   "{{ tmask_system }}"
+       state:                  directory
+       owner:                  "{{ ansible_postgres_user_id }}"
+       group:                  "{{ ansible_postgres_group_id }}"
+
+   - name:                     Tmask ver Folder
+     file:
+       path:                   "{{ tmask_system}}/{{ver}}"
+       state:                  directory
+       owner:                  "{{ ansible_postgres_user_id }}"
+       group:                  "{{ ansible_postgres_group_id }}"
+
+   - name:                     Del Inidtdb
+     command:                  "rm -rf {{ tmask_system }}/{{ver}}"
+     ignore_errors:            yes
+
+   - name:                     Inidtdb w tmask_system
+     command:                  sudo -u {{ansible_postgres_user_id}} bash -c "{{ initdb }} -D {{ tmask_system }}/{{ver}}"
+
+   - name:                     All chown root
+     command:                  "chown -R root:root {{ tmask_system }}/{{ver}}"
+
+   - name:                     Copy postgersql.conf
+     copy:
+       src:                    ./Files/postgresql01.conf
+       dest:                   "{{ tmask_system }}/{{ver}}/postgresql.conf"
+       mode:                   0644
+
+   - name:                     Copy pg_hba.conf
+     copy:
+       src:                    ./Files/pg_hba01.conf
+       dest:                   "{{ tmask_system }}/{{ver}}/pg_hba.conf"
+       mode:                   0644
+
+   - name:                     All chown postgres
+     command:                  "chown -R {{ansible_postgres_user_id}}:{{ansible_postgres_user_id}} {{ tmask_system }}/{{ver}}"
+
+   - name:                     Start DB tmask_system
+     command:                  sudo -u {{ansible_postgres_user_id}} bash -c  "{{ pg_ctl }} -D {{ tmask_system }}/{{ver}} -l {{ tmask_system }}/{{ver}}/logfile start"
